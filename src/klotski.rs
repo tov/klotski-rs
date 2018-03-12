@@ -59,7 +59,7 @@ pub struct Move {
 
 impl Move {
     pub fn to_u64(self) -> u64 {
-        (self.piece as i8 + self.direction as i8 * N_PIECES as i8) as u64
+        (self.piece as i8 + self.direction as i8) as u64
     }
 
     pub fn from_u64(n: u64) -> Self {
@@ -80,11 +80,11 @@ impl MoveSet {
     }
 
     pub fn remove(&mut self, a_move: Move) {
-        self.0 |= 1 << a_move.to_u64();
+        self.0 |= 1u64 << a_move.to_u64();
     }
 
     pub fn is_allowed(&self, a_move: Move) -> bool {
-        self.0 & (1 << a_move.to_u64()) == 0
+        self.0 & (1u64 << a_move.to_u64()) == 0
     }
 }
 
@@ -119,23 +119,23 @@ impl IntoIterator for MoveSet {
 }
 
 #[derive(Debug, Copy, Clone, PartialEq, Eq, Hash)]
-pub struct Board([BoardRow; HEIGHT]);
+pub struct Klotski([BoardRow; HEIGHT]);
 pub type BoardRow = [Piece; WIDTH];
 
-const INITIAL_BOARD: Board =
-    Board([[V0, S0, S0, V1],
-           [V0, S0, S0, V1],
-           [V2, H0, H0, V3],
-           [V2, C0, C1, V3],
-           [C2, X0, X0, C3]]);
+pub const INITIAL_BOARD: Klotski =
+    Klotski([[V0, S0, S0, V1],
+             [V0, S0, S0, V1],
+             [V2, H0, H0, V3],
+             [V2, C0, C1, V3],
+             [C2, X0, X0, C3]]);
 
-impl Board {
+impl Klotski {
     pub fn initial() -> Self {
         INITIAL_BOARD
     }
 }
 
-impl Puzzle for Board {
+impl Puzzle for Klotski {
     type Move = Move;
     type MoveIter = MoveSet;
 
@@ -151,6 +151,7 @@ impl Puzzle for Board {
 
         for (y, row) in self.0.iter().enumerate() {
             for (x, &piece) in row.iter().enumerate() {
+                if piece == X0 {continue;}
                 for &direction in DIRECTIONS.iter() {
                     if let Some((nx, ny)) = direction.from(x, y) {
                         let target = self.0[ny][nx];
@@ -168,10 +169,11 @@ impl Puzzle for Board {
     }
 
     fn make_move(&self, a_move: Move) -> Self {
-        let mut result = Board([[X0; WIDTH]; HEIGHT]);
+        let mut result = Klotski([[X0; WIDTH]; HEIGHT]);
 
         for (y, row) in self.0.iter().enumerate() {
             for (x, &piece) in row.iter().enumerate() {
+                if piece == X0 {continue;}
                 if piece == a_move.piece {
                     let (nx, ny) = a_move.direction.from(x, y).expect("apply_move");
                     result.0[ny][nx] = piece;
