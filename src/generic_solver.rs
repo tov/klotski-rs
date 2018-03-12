@@ -1,9 +1,13 @@
-use std::collections::BTreeSet;
-use std::collections::HashSet;
+//! A generic breadth-first puzzle solver.
+
+use std::collections::{BTreeSet, HashSet};
 use std::hash::Hash;
 use std::mem;
 
-/// A simple interface for sets
+/// A simple interface for sets used to keep track of visited states.
+///
+/// Instances are provided for `std::collections::HashSet` and
+/// `std::collections::BTreeSet`.
 pub trait Set<A: Eq> {
     /// Creates a new, empty set.
     fn new() -> Self;
@@ -41,17 +45,28 @@ impl<A: Eq + Ord> Set<A> for BTreeSet<A> {
     }
 }
 
-/// An interface to puzzla configurations.
+/// An interface to puzzle configurations.
 pub trait Puzzle: Clone + Eq {
+    /// The type of a move.
     type Move;
-    type MoveIter: IntoIterator<Item = Self::Move>;
+    /// The type of a set of moves.
+    ///
+    /// This is returned by `get_possible_moves` and must be iterable.
+    type MoveSet: IntoIterator<Item = Self::Move>;
+
+    /// Applies a move to the state of the puzzle, returning a new puzzle state.
     fn make_move(&self, a_move: Self::Move) -> Self;
-    fn get_possible_moves(&self) -> Self::MoveIter;
+
+    /// Gets a set of all moves possible in the current state.
+    fn get_possible_moves(&self) -> Self::MoveSet;
+
+    /// Checks whether the current state is a winning state.
     fn is_final(&self) -> bool;
 }
 
+/// A path through the states from the initial state to the final, winning state.
 #[derive(Debug, Clone)]
-pub struct Path<P>(Vec<P>);
+struct Path<P>(Vec<P>);
 
 impl<P> Path<P> {
     fn new(start: P) -> Self {
@@ -66,17 +81,22 @@ impl<P> Path<P> {
         self.0.push(step);
     }
 
-    pub fn into_vec(self) -> Vec<P> {
+    fn into_vec(self) -> Vec<P> {
         self.0
     }
 }
 
-pub struct Solver<P: Puzzle, S: Set<P>> {
+/// A BFS puzzle solver.
+///
+/// Parameterized by the type of the puzzle and the type of set to use to
+/// store puzzle states.
+pub struct Solver<P: Puzzle, S: Set<P> = HashSet<P>> {
     seen: S,
     todo: Vec<Path<P>>,
 }
 
 impl<P: Puzzle, S: Set<P>> Solver<P, S> {
+    /// Creates a new solver given the initial configuration of the puzzle.
     pub fn new(initial_configuration: P) -> Self {
         Solver {
             seen: S::new(),
@@ -84,6 +104,7 @@ impl<P: Puzzle, S: Set<P>> Solver<P, S> {
         }
     }
 
+    /// Solves the puzzle, returning a path, if possible.
     pub fn solve(mut self) -> Option<Vec<P>> {
         while !self.todo.is_empty() {
             let paths = mem::replace(&mut self.todo, Vec::new());
@@ -114,13 +135,13 @@ mod tests {
 
     impl Puzzle for i32 {
         type Move = i32;
-        type MoveIter = Vec<i32>;
+        type MoveSet = Vec<i32>;
 
         fn make_move(&self, a_move: Self::Move) -> Self {
             *self + a_move
         }
 
-        fn get_possible_moves(&self) -> Self::MoveIter {
+        fn get_possible_moves(&self) -> Self::MoveSet {
             vec![-1, 2]
         }
 
@@ -130,7 +151,7 @@ mod tests {
     }
 
     fn solve_i32_game() -> Option<Vec<i32>> {
-        let config = Solver::<i32, HashSet<i32>>::new(1);
+        let config = Solver::<i32>::new(1);
         config.solve()
     }
 

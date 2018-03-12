@@ -11,7 +11,7 @@ const N_DIRECTIONS: usize = 4;
 
 #[derive(Eq, PartialEq, Ord, PartialOrd, Copy, Clone, Hash, Debug)]
 #[repr(i8)]
-pub enum Piece {
+enum Piece {
     C0 = 0,
     C1 = 1,
     C2 = 2,
@@ -27,7 +27,7 @@ pub enum Piece {
 
 #[derive(Eq, PartialEq, Copy, Clone, Hash, Debug)]
 #[repr(i8)]
-pub enum Direction {
+enum Direction {
     North = 0 * N_PIECES as i8,
     South = 1 * N_PIECES as i8,
     West  = 2 * N_PIECES as i8,
@@ -58,11 +58,11 @@ pub struct Move {
 }
 
 impl Move {
-    pub fn to_u64(self) -> u64 {
+    fn to_u64(self) -> u64 {
         (self.piece as i8 + self.direction as i8) as u64
     }
 
-    pub fn from_u64(n: u64) -> Self {
+    fn from_u64(n: u64) -> Self {
         Move {
             piece: PIECES[n as usize % N_PIECES],
             direction: DIRECTIONS[n as usize / N_PIECES],
@@ -75,15 +75,15 @@ impl Move {
 pub struct MoveSet(u64);
 
 impl MoveSet {
-    pub fn new() -> Self {
+    fn new() -> Self {
         MoveSet(0)
     }
 
-    pub fn remove(&mut self, a_move: Move) {
+    fn remove(&mut self, a_move: Move) {
         self.0 |= 1u64 << a_move.to_u64();
     }
 
-    pub fn is_allowed(&self, a_move: Move) -> bool {
+    fn is_allowed(&self, a_move: Move) -> bool {
         self.0 & (1u64 << a_move.to_u64()) == 0
     }
 }
@@ -120,9 +120,9 @@ impl IntoIterator for MoveSet {
 
 #[derive(Debug, Copy, Clone, PartialEq, Eq, PartialOrd, Ord, Hash)]
 pub struct Klotski([BoardRow; HEIGHT]);
-pub type BoardRow = [Piece; WIDTH];
+type BoardRow = [Piece; WIDTH];
 
-pub const INITIAL_BOARD: Klotski =
+const INITIAL_BOARD: Klotski =
     Klotski([[V0, S0, S0, V1],
              [V0, S0, S0, V1],
              [V2, H0, H0, V3],
@@ -137,7 +137,7 @@ impl Klotski {
 
 impl Puzzle for Klotski {
     type Move = Move;
-    type MoveIter = MoveSet;
+    type MoveSet = MoveSet;
 
     fn is_final(&self) -> bool {
         self.0[3][1] == S0

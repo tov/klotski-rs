@@ -1,6 +1,5 @@
 extern crate klotski;
 
-use std::collections::HashSet;
 use std::time::Instant;
 
 use klotski::generic_solver::*;
@@ -8,7 +7,7 @@ use klotski::klotski::*;
 
 fn main() {
     let initial = Klotski::initial();
-    let solver = Solver::<Klotski, HashSet<Klotski>>::new(initial);
+    let solver = Solver::<Klotski>::new(initial);
 
     println!("Solving {:?}...", initial);
 
