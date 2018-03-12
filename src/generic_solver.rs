@@ -30,7 +30,7 @@ impl<A: Eq + Hash> Set<A> for HashSet<A> {
 pub trait Puzzle: Clone + Eq {
     type Move;
     type MoveIter: IntoIterator<Item = Self::Move>;
-    fn make_move(&mut self, move_: &Self::Move);
+    fn make_move(&self, a_move: Self::Move) -> Self;
     fn get_possible_moves(&self) -> Self::MoveIter;
     fn is_final(&self) -> bool;
 }
@@ -78,8 +78,7 @@ impl<P: Puzzle, S: Set<P>> Solver<P, S> {
                 }
 
                 for each_move in path.last().get_possible_moves() {
-                    let mut next_config = path.last().clone();
-                    next_config.make_move(&each_move);
+                    let next_config = path.last().make_move(each_move);
                     if !self.seen.mem(&next_config) {
                         self.seen.add(next_config.clone());
                         let mut next_path = path.clone();
@@ -102,8 +101,8 @@ mod tests {
         type Move = i32;
         type MoveIter = Vec<i32>;
 
-        fn make_move(&mut self, move_: &Self::Move) {
-            *self += move_;
+        fn make_move(&self, a_move: Self::Move) -> Self {
+            *self + a_move
         }
 
         fn get_possible_moves(&self) -> Self::MoveIter {
