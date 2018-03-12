@@ -1,3 +1,4 @@
+use std::collections::BTreeSet;
 use std::collections::HashSet;
 use std::hash::Hash;
 use std::mem;
@@ -26,6 +27,20 @@ impl<A: Eq + Hash> Set<A> for HashSet<A> {
     }
 }
 
+impl<A: Eq + Ord> Set<A> for BTreeSet<A> {
+    fn new() -> Self {
+        BTreeSet::new()
+    }
+
+    fn add(&mut self, element: A) {
+        self.insert(element);
+    }
+
+    fn mem(&self, candidate: &A) -> bool {
+        self.contains(candidate)
+    }
+}
+
 /// An interface to puzzla configurations.
 pub trait Puzzle: Clone + Eq {
     type Move;
@@ -39,15 +54,15 @@ pub trait Puzzle: Clone + Eq {
 pub struct Path<P>(Vec<P>);
 
 impl<P> Path<P> {
-    pub fn new(start: P) -> Self {
+    fn new(start: P) -> Self {
         Path(vec![start])
     }
 
-    pub fn last(&self) -> &P {
+    fn last(&self) -> &P {
         self.0.last().expect("Path should be non-empty")
     }
 
-    pub fn push(&mut self, step: P) {
+    fn push(&mut self, step: P) {
         self.0.push(step);
     }
 
@@ -65,7 +80,7 @@ impl<P: Puzzle, S: Set<P>> Solver<P, S> {
     pub fn new(initial_configuration: P) -> Self {
         Solver {
             seen: S::new(),
-            todo: vec![Path(vec![initial_configuration])],
+            todo: vec![Path::new(initial_configuration)],
         }
     }
 

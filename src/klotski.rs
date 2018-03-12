@@ -9,7 +9,7 @@ const HEIGHT: usize = 5;
 const N_PIECES: usize = 10;
 const N_DIRECTIONS: usize = 4;
 
-#[derive(Eq, PartialEq, Copy, Clone, Hash, Debug)]
+#[derive(Eq, PartialEq, Ord, PartialOrd, Copy, Clone, Hash, Debug)]
 #[repr(i8)]
 pub enum Piece {
     C0 = 0,
@@ -118,7 +118,7 @@ impl IntoIterator for MoveSet {
     }
 }
 
-#[derive(Debug, Copy, Clone, PartialEq, Eq, Hash)]
+#[derive(Debug, Copy, Clone, PartialEq, Eq, PartialOrd, Ord, Hash)]
 pub struct Klotski([BoardRow; HEIGHT]);
 pub type BoardRow = [Piece; WIDTH];
 
