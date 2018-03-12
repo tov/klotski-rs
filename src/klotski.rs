@@ -1,3 +1,5 @@
+//! An instance of the `Puzzle` trait for Klotski.
+
 use super::generic_solver::*;
 
 use self::Piece::*;
@@ -51,6 +53,7 @@ impl Direction {
     }
 }
 
+/// A Klotski move.
 #[derive(Eq, Debug, PartialEq, Copy, Clone, Hash)]
 pub struct Move {
     piece: Piece,
@@ -71,6 +74,7 @@ impl Move {
 }
 
 // A `MoveSet` is a bitset of moves, where 0 means allowed and 1 means disallowed.
+/// A set of Klotski moves, which can be iterated over.
 #[derive(Eq, PartialEq, Copy, Clone, Hash)]
 pub struct MoveSet(u64);
 
@@ -88,6 +92,7 @@ impl MoveSet {
     }
 }
 
+/// An iterator over a set of Klotski moves.
 pub struct MoveSetIter {
     set: MoveSet,
     next: u64,
@@ -118,8 +123,10 @@ impl IntoIterator for MoveSet {
     }
 }
 
+/// The state of the Klotski board.
 #[derive(Debug, Copy, Clone, PartialEq, Eq, PartialOrd, Ord, Hash)]
 pub struct Klotski([BoardRow; HEIGHT]);
+
 type BoardRow = [Piece; WIDTH];
 
 const INITIAL_BOARD: Klotski =
@@ -130,6 +137,7 @@ const INITIAL_BOARD: Klotski =
              [C2, X0, X0, C3]]);
 
 impl Klotski {
+    /// Returns the initial board.
     pub fn initial() -> Self {
         INITIAL_BOARD
     }
