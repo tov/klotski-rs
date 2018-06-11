@@ -15,6 +15,6 @@ fn main() {
     let result = solver.solve().expect("a solution");;
     let duration = before.elapsed();
 
-    println!("Solution: {:?}", result);
+    println!("Solution in {} steps: {:?}", result.len(), result);
     println!("Solved in {} seconds", duration.as_secs());
 }
